@@ -1,6 +1,27 @@
-# 更新日志
+﻿# 更新日志
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+
+## [1.1.0] - 2026-11-22
+
+新增 **PAINT 补丁**（CLIP STUDIO PAINT 本体繁→简）。
+
+### 新增
+
+- `patch_paint.py`：改 `CLIPStudioPaint.exe` 两个字节
+  - `0x12B7D20`: `04` → `05`（简体系统加载 chinese_tc）
+  - `0x12B791F`: `75` → `EB`（区域检查 jne→jmp，**区域锁绕过**）
+- `PAINT补丁.cmd`：交互式双击脚本
+- `PAINT_PATCH_RISKS.md`：风险说明（法律 + 技术）
+
+### 安全设计
+
+- SHA-256 强校验，只对已验证的 1.11.6.0 原版执行
+- **默认只做语言转换**，区域锁绕过需显式 `--allow-region-bypass`
+- 支持增量应用（先转语言，遇锁区提示再加绕过）
+- 自动备份 + `--restore` 一键还原
+
+---
 
 ## [1.0.0] - 2026-11-22
 
