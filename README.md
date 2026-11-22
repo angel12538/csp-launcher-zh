@@ -22,7 +22,20 @@
 
 ---
 
-## 这是什么
+## 适用范围
+
+本仓库包含两个**独立**的补丁，按需选用：
+
+| 补丁 | 作用 | 风险 |
+|---|---|---|
+| **启动器汉化** | CLIP STUDIO 启动器：繁→简 | 低，可一键还原 |
+| **PAINT 汉化** | CLIP STUDIO PAINT：繁→简 + 绕过区域锁 | ⚠️ 高，改可执行文件，见 [风险说明](PAINT_PATCH_RISKS.md) |
+
+先看下面的启动器部分。需要 PAINT 的话跳到 [PAINT 补丁](#paint-补丁)。
+
+---
+
+## 这是什么（启动器）
 
 CLIP STUDIO 的界面语言由系统语言决定。简体中文 Windows 上，国际版会因为
 找不到简体资源而**回落到英文界面**。
@@ -136,6 +149,65 @@ Interceptor.attach(Module.getExportByName('kernel32.dll', 'CreateFileW'), {
 ```
 
 本项目就是这么发现「真正读的是用户数据目录」的。
+
+---
+
+## PAINT 补丁
+
+> ⚠️ **使用前必读：[PAINT_PATCH_RISKS.md](PAINT_PATCH_RISKS.md)**
+>
+> 这个补丁会**修改可执行文件**，并且包含**区域锁绕过**，
+> 法律与技术风险都和启动器补丁不同。
+
+### 它解决什么问题
+
+国际版 CLIP STUDIO PAINT 在简体中文系统上：
+
+1. 找不到 `chinese_sc` 资源 → 界面回落英文
+2. 即使手工造出 `chinese_sc` 目录 → 触发「以非工作對象的作業系統啟動了程式」锁区提示
+
+### 补丁内容
+
+改 `CLIPStudioPaint.exe` 的 2 个字节：
+
+| 偏移 | 原值 | 新值 | 作用 | 性质 |
+|---|---|---|---|---|
+| `0x12B7D20` | `04` | `05` | 简体系统加载 `chinese_tc` 资源 | 语言映射 |
+| `0x12B791F` | `75` | `EB` | 区域检查 `jne`→`jmp` | **区域锁绕过** |
+
+**默认只应用第一处**（语言转换）。第二处需显式加参数：
+
+```cmd
+python patch_paint.py --apply                            # 只转语言
+python patch_paint.py --apply --allow-region-bypass      # 同时绕过区域锁
+```
+
+### 使用方法
+
+双击 **`PAINT补丁.cmd`**，按提示操作。
+
+手动方式：
+
+```cmd
+python patch_paint.py --check    # 先看状态
+python patch_paint.py --apply    # 应用
+python patch_paint.py --restore  # 还原
+```
+
+### 安全机制
+
+- **SHA-256 强校验**：只对已验证的原版（1.11.6.0）执行，其他版本直接拒绝
+- **自动备份**：`%USERPROFILE%\.csp-l10n-backup\paint\`
+- **可增量应用**：先转语言、发现锁区再加绕过，不会走进死路
+- **可还原**：`--restore` 一键回退
+
+### 为什么这么谨慎
+
+这个补丁改的是 62.6 MB 可执行文件的内部指令。偏移写错了，
+程序就废了。所以脚本宁可拒绝执行，也不冒险。
+
+而且——**如果条件允许，升级软件比打补丁更好**：CELSYS 在 2025 年 7 月的
+版本里已经正式支持简体中文，不需要任何补丁。
 
 ---
 
