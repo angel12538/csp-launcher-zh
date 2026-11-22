@@ -19,22 +19,14 @@ timeout /t 2 /nobreak >nul
 
 set HERE=%~dp0
 
-echo [1/2] 还原资源文件...
-python "%HERE%patch_resource.py" --restore
-if errorlevel 1 (
-    echo [失败] 资源还原出错
-    pause
-    exit /b 1
-)
-
-echo.
-echo [2/2] 还原左侧菜单...
+echo [1/3] 还原左侧菜单...
 python "%HERE%patch_menu.py" --restore
-if errorlevel 1 (
-    echo [失败] 菜单还原出错
-    pause
-    exit /b 1
-)
+echo.
+echo [2/3] 还原页面语言表...
+python "%HERE%patch_pagejs.py" --restore
+echo.
+echo [3/3] 还原主内容资源...
+python "%HERE%patch_resource.py" --restore
 
 echo.
 echo 还原完成。

@@ -22,19 +22,28 @@ timeout /t 2 /nobreak >nul
 
 set HERE=%~dp0
 
-echo [1/2] 转换资源文件...
-python "%HERE%patch_resource.py"
-if errorlevel 1 (
-    echo [失败] 资源转换出错
-    pause
-    exit /b 1
-)
-
-echo.
-echo [2/2] 转换左侧菜单...
+echo [1/3] 转换左侧菜单...
 python "%HERE%patch_menu.py"
 if errorlevel 1 (
     echo [失败] 菜单转换出错
+    pause
+    exit /b 1
+)
+echo.
+
+echo [2/3] 转换页面语言表...
+python "%HERE%patch_pagejs.py"
+if errorlevel 1 (
+    echo [失败] 页面语言表转换出错
+    pause
+    exit /b 1
+)
+echo.
+
+echo [3/3] 转换主内容资源...
+python "%HERE%patch_resource.py"
+if errorlevel 1 (
+    echo [失败] 资源转换出错
     pause
     exit /b 1
 )

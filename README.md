@@ -103,19 +103,23 @@ python patch_menu.py --dry-run
 
 想改别的东西的话，这部分可能有用。
 
-### 1. 界面文字来自两处
+### 1. 界面文字来自三处
 
 | 位置 | 内容 |
 |---|---|
-| `<安装目录>\CLIP STUDIO\resource\<语言>\*.js` | 主内容区、对话框、按钮 |
+| `<安装目录>\CLIP STUDIO\resource\<语言>\*.js` | 主内容资源包 |
+| `<安装目录>\CLIP STUDIO\Settings\CLIP STUDIO2\<ver>\HTML\resource\page.js` | **页面文字**（云端设置、版本信息、素材管理等） |
 | `%APPDATA%\CELSYSUserData\CELSYS\CLIPStudioVer1_5_0\MENU\1\assets\side_menu.js` | 左侧菜单 |
 
-**注意**：安装目录里的 `Settings\CLIP STUDIO2\<ver>\` 下的 `side_menu.js`
-**不是**启动器读取的那份。真正的菜单脚本在**用户数据目录**。这一点如果不注意，
-改多久都不会生效。
+**两个大坑**：
+
+- 安装目录里的 `Settings\CLIP STUDIO2\<ver>\` 下的 `side_menu.js`
+  **不是**启动器读取的那份。真正的菜单脚本在**用户数据目录**。
+- `page.js` 里按语言分块（`langText['ja-jp']` / `['en-us']` / `['zh-tw']` …），
+  但简体中文系统实际加载的是 **`zh-tw` 块**，不是 `en-us` 块。
 
 简体中文系统会被映射到 `resource\english\` 目录（国际版没有 `chinese_sc`）。
-所以补丁的做法是：把 `resource\chinese_tc\` 的内容转成简体后写进 `resource\english\`。
+所以资源补丁的做法是：把 `resource\chinese_tc\` 的内容转成简体后写进 `resource\english\`。
 
 ### 2. 资源文件是带长度前缀的字符串池
 
