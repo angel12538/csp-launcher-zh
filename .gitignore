@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# opencc 本地依赖（体积大，让用户自己 pip install）
+libs/
+
+# 备份与临时产物
+.csp-l10n-backup/
+*.bak
+*.bak-*
+
+# 绝不能提交：CELSYS 版权文件
+原版备份/
+launcher_resource_*/
+userdata_MENU_1/
+CLIPStudio.exe
+*.js.bak*
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
