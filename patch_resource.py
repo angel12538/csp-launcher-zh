@@ -33,7 +33,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common  # noqa: E402
 import varlen  # noqa: E402
-from terms_tw2cn import build_table, has_japanese  # noqa: E402
+from terms_tw2cn import build_table, has_japanese, localize_text  # noqa: E402
 
 BACKUP_DIR = os.path.join(os.path.expanduser("~"), ".csp-l10n-backup", "resource")
 
@@ -41,7 +41,7 @@ BACKUP_DIR = os.path.join(os.path.expanduser("~"), ".csp-l10n-backup", "resource
 def convert_pack(data, cc, table):
     """解析一个资源包，返回 (重建后的字节, 统计字典)。
 
-    对每个文本叶子：先逐字转简体，再做台湾用语替换。
+    对每个文本叶子：先逐字转简体，再做「词级 + 整句」两级用语替换。
     含日文假名的叶子只做逐字转换（历史行为），不做用语替换，避免误伤。
     """
     root = varlen.parse_tree(data, 0, len(data))
@@ -55,8 +55,8 @@ def convert_pack(data, cc, table):
         new = cc.convert(lf.text)
         chars = sum(1 for a, b in zip(lf.text, new) if a != b)
         n_cjk += chars
-        if not has_japanese(lf.text) and table:
-            new2, cnt = _apply_terms(new, table)
+        if table:
+            new2, cnt = localize_text(new, table)
             if cnt:
                 n_term += cnt
                 new = new2
@@ -73,16 +73,6 @@ def convert_pack(data, cc, table):
         "new_size": len(out),
     }
     return out, mapping, stats
-
-
-def _apply_terms(text, table):
-    changed = 0
-    for tw, cn in table:
-        if tw in text:
-            n = text.count(tw)
-            text = text.replace(tw, cn)
-            changed += n
-    return text, changed
 
 
 def check_result(data, mapping, out):
@@ -218,11 +208,9 @@ def verify_dir(dst, cc, table):
         for lf in varlen.collect_leaves(root):
             if not lf.text:
                 continue
-            if has_japanese(lf.text):
-                continue
-            if any(ch in cc.table for ch in lf.text):
+            if not has_japanese(lf.text) and any(ch in cc.table for ch in lf.text):
                 n_trad += 1
-            _, cnt = _apply_terms(lf.text, table)
+            _, cnt = localize_text(lf.text, table)
             n_term += cnt
         flag = "" if (n_trad == 0 and n_term == 0) else "  <-- 待处理"
         if flag:
