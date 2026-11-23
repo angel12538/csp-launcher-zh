@@ -41,7 +41,7 @@ if errorlevel 1 (
 )
 echo.
 
-echo [3/4] 转换主内容资源（繁 -> 简）...
+echo [3/4] 转换主内容资源（繁 -> 简 + 台湾用语）...
 python "%HERE%patch_resource.py"
 if errorlevel 1 (
     echo [失败] 资源转换出错
@@ -50,7 +50,7 @@ if errorlevel 1 (
 )
 echo.
 
-echo [4/4] 本地化台湾用语...
+echo [4/4] 本地化页面与菜单脚本里的台湾用语...
 python "%HERE%patch_terms.py" --apply
 if errorlevel 1 (
     echo [失败] 术语本地化出错
